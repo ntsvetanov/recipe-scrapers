@@ -85,9 +85,11 @@ def save_to_csv(recipes: list[RecipeData], path: str | Path) -> None:
     List and dict fields are stored as JSON strings so that the CSV
     remains a flat table while preserving all data.
     """
+    fieldnames = list(RecipeData.__dataclass_fields__.keys())
     if not recipes:
+        with open(path, "w", newline="", encoding="utf-8") as f:
+            csv.DictWriter(f, fieldnames=fieldnames).writeheader()
         return
-    fieldnames = list(asdict(recipes[0]).keys())
     with open(path, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
@@ -284,7 +286,7 @@ def main() -> None:
     parser.add_argument(
         "--json",
         action="store_true",
-        help="Print results as JSON to stdout",
+        help="Print results as JSON to stdout (ignored when --output is set)",
     )
     parser.add_argument(
         "--dish",

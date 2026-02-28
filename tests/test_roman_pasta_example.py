@@ -158,7 +158,7 @@ class TestStorage(unittest.TestCase):
             os.unlink(path)
 
     def test_save_csv_empty(self):
-        """save_to_csv with empty list should not create content."""
+        """save_to_csv with empty list should write only headers."""
         with tempfile.NamedTemporaryFile(
             suffix=".csv", delete=False, mode="w"
         ) as f:
@@ -166,7 +166,12 @@ class TestStorage(unittest.TestCase):
         try:
             save_to_csv([], path)
             with open(path, encoding="utf-8") as f:
-                self.assertEqual(f.read(), "")
+                content = f.read()
+            self.assertIn("title", content)
+            self.assertIn("ingredients", content)
+            # Should have only the header line
+            lines = [l for l in content.strip().splitlines() if l.strip()]
+            self.assertEqual(len(lines), 1)
         finally:
             os.unlink(path)
 
