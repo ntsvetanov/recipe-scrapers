@@ -284,6 +284,25 @@ class TestRecipeCollectionScrape(unittest.TestCase):
         self.assertEqual(col.dish_names, ["dish_a"])
         self.assertEqual(col.name, "Test Collection")
 
+    @patch("examples.recipe_collector.scrape_recipe")
+    def test_custom_collection_scrape(self, mock_scrape):
+        """A custom collection should scrape its own recipes."""
+        col = RecipeCollection(
+            name="Custom",
+            recipes={"dish_x": ["https://example.com/x1", "https://example.com/x2"]},
+        )
+        mock_scrape.return_value = RecipeData(
+            title="X Recipe",
+            url="https://example.com/x1",
+            dish="dish_x",
+            ingredients=["item"],
+            instructions=["Step 1"],
+        )
+        result = col.scrape(dishes=["dish_x"])
+        self.assertEqual(len(result), 2)
+        scraped_urls = [call.args[0] for call in mock_scrape.call_args_list]
+        self.assertEqual(scraped_urls, ["https://example.com/x1", "https://example.com/x2"])
+
 
 if __name__ == "__main__":
     unittest.main()
